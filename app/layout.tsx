@@ -1,4 +1,6 @@
 import './globals.css'
+import Nav from '@/pages/api/auth/Nav'
+import { Roboto } from '@next/font/google'
 
 export default function RootLayout({
   children,
@@ -12,7 +14,11 @@ export default function RootLayout({
         head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
       */}
       <head />
-      <body>{children}</body>
+      <body>
+        <Nav/>
+        {children}
+        </body>
+   
     </html>
   )
 }
