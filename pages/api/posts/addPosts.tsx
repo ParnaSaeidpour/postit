@@ -33,8 +33,16 @@ export default async function handler(
 
       //Create Post
       try{
+        const result =await prisma.post.create({
+          data:{
+            title,
+            userId: prismaUser.id,
+          },
+        })
+        res.status(200).json(result)
 
       }catch(err){
+        res.status(403).json({err:'Error has occured whils making a post'})
         
       }
 
