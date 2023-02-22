@@ -12,7 +12,16 @@ export default async function handler(
     if(!session)
 
       return res.status(401).json({message:'Please sign in to make a post'})
-      console.log(req.body)
+      
+      const title:string=req.body.title
+
+      //Check title
+
+      if (title.length>300)
+        return res.status(403).json({message:"Please write a shorter post"})
+
+      if (title.length)
+        return res.status(403).json({message:"Please do not leave this empty"})
 
     } 
 
