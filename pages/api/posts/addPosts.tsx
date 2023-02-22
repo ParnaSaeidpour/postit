@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {authOptions} from '../auth/[...nextauth]'
 import { getServerSession } from "next-auth/next"
+import prisma from "../../../prisma/client"
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,6 +16,13 @@ export default async function handler(
       
       const title:string=req.body.title
 
+
+      //Get user
+
+      const prismaUser= await prisma.user.findUniqe({
+        where:{email:session?.user?.email}
+      })
+
       //Check title
 
       if (title.length>300)
@@ -23,8 +31,12 @@ export default async function handler(
       if (title.length)
         return res.status(403).json({message:"Please do not leave this empty"})
 
-    } 
+      //Create Post
+      try{
 
-    
-  
+      }catch(err){
+        
+      }
+
+    } 
 }
