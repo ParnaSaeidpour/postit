@@ -22,7 +22,9 @@ export default function Logged({image}:User){
                     Sign out
                 </button>
                 <Link href={"/dashboard"}>
-                    <Image width={64} height={64} src={image} alt="priority"/>
+                    {image
+                        ? <Image className="rounded-full" width={64} height={64} src={image} alt="My posts"/>
+                        : <span className="font-bold text-gray-700">My posts</span>}
                 
                 </Link>
         </li>
