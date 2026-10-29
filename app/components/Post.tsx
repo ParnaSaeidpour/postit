@@ -1,31 +1,30 @@
 'use client'
 
 import Image from "next/image"
-import Link from "next/link"
 
+type PostProps = {
+    avatar: string | null
+    name: string | null
+    postTitle: string
+}
 
-
-
-export default function Post({avatar,name,postTitle,id,Comment}){
-    return(
+export default function Post({ avatar, name, postTitle }: PostProps) {
+    return (
         <div className="bg-white my-8 p-8 rounded-lg">
             <div className="flex items-center gap-2">
-                <Image
-                className="rounded-full"
-                width={32}
-                height={32}
-                src={avatar}
-                alt="avatar"
-                />
-                <h3 className="font-bold text-gray-700">{name}</h3>
+                {avatar && (
+                    <Image
+                        className="rounded-full"
+                        width={32}
+                        height={32}
+                        src={avatar}
+                        alt="avatar"
+                    />
+                )}
+                <h3 className="font-bold text-gray-700">{name || "Anonymous"}</h3>
             </div>
             <div className="my-8">
-                <p>{postTitle}</p>
-            </div>
-            <div className="flex gap-4 cursor-pointer items-center">
-                <Link href={`/post/${id}`}>
-                    <p className="text-sm font-blod text-gray-700">{Comment?.length}Comments</p>
-                </Link>
+                <p className="break-words">{postTitle}</p>
             </div>
         </div>
     )

@@ -7,8 +7,9 @@ import { toast } from "react-hot-toast"
 export default function CreatePost(){
     const [title,setTitle]=useState("")
     const [isDisabled, setIsDisabled]=useState(false)
+    const queryClient = useQueryClient()
     let toastPostId:string
-    
+
 
     //create a post
 
@@ -23,8 +24,11 @@ export default function CreatePost(){
                 }
                 setIsDisabled(false)
             },
-            onSuccess:(data)=>{
+            onSuccess:()=>{
                 toast.success("Post has been made 🔥", {id:toastPostId})
+                // Reload the post lists so the new post appears straight away
+                queryClient.invalidateQueries(["posts"])
+                queryClient.invalidateQueries(["auth-posts"])
                 setTitle("")
                 setIsDisabled(false)
             },
@@ -40,19 +44,19 @@ export default function CreatePost(){
 
 
     return(
-        <form onSubmit={submitPost}  action="clientpost" className="bg-white my-8 p-8 rounded-md">
+        <form onSubmit={submitPost} className="bg-white my-8 p-8 rounded-md">
             <div className="flex flex-col my-4">
                 <textarea className="p-4 rounded-md my-2
                 bg-gray-200 text-lg"
                 onChange={(e)=>setTitle(e.target.value)}
-                name="title" value={title} placeholder="what is your mind?"
+                name="title" value={title} placeholder="What is on your mind?"
                 > 
                 </textarea>
             </div>
             <div className="flex items-center justify-between gap-2 ">
                 <p className={`font-bold text-sm ${title.length>300 ? "text-red-700":"text-gray-700"}`}>{`${title.length}/300`}</p>
                 <button 
-                disabled={isDisabled}
+                disabled={isDisabled || !title.trim() || title.length > 300}
                 className="text-sm bg-teal-600 text-white py-2 px-6 rounded-xl disabled:opacity-25" 
                 type="submit" >Create a post</button>
             </div>

@@ -1,38 +1,106 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Postit
 
-## Getting Started
+A small social posting app: sign in with Google, write short posts, see everyone's posts on the home page, and find your own posts on your dashboard.
 
-First, run the development server:
+> Built in February 2023. Updated in October 2026 with a working dashboard, input validation, tests and CI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+## Screenshots
+
+*Running locally with test users.*
+
+| Home | My posts |
+|---|---|
+| ![Home page with a new post](docs/screenshots/home.png) | ![Dashboard with the user's posts](docs/screenshots/my-posts.png) |
+
+## Features
+
+- Google sign-in with NextAuth, users and sessions stored with the Prisma adapter
+- Write posts of up to 300 characters, with a live character counter
+- Home feed with all posts, newest first
+- Dashboard with your own posts
+- Toast notifications for success and errors
+- Server-side validation and sign-in checks on every API route
+- Only public profile fields (name, picture) are sent to the browser
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Framework | Next.js 13 (App Router + API routes), React 18, TypeScript |
+| Auth | NextAuth.js (Google OAuth), Prisma adapter |
+| Database | PostgreSQL, Prisma ORM |
+| Data fetching | TanStack React Query, Axios |
+| UI | Tailwind CSS, react-hot-toast |
+| Tests / CI | Vitest, GitHub Actions |
+
+## How it works
+
+```
+Browser
+├── /            Home: AddPost form + all posts      ──► GET  /api/posts/getPosts
+│                                                   ──► POST /api/posts/addPosts
+├── /dashboard   Signed-in user's posts             ──► GET  /api/posts/authPosts
+└── Nav          Sign in / sign out (server component, reads the session)
+
+API routes (pages/api)
+├── auth/[...nextauth].ts   Google login, users stored via Prisma
+└── posts/*                 check session ──► validate (lib/posts.ts) ──► Prisma ──► PostgreSQL
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Data model (`prisma/schema.prisma`): `User`, `Account`, `Session`, `VerificationToken` (NextAuth) and `Post`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Getting started
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Prerequisites
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+- Node.js 18+
+- PostgreSQL
+- A Google OAuth client ([Google Cloud Console](https://console.cloud.google.com/apis/credentials)) with redirect URI `http://localhost:3000/api/auth/callback/google`
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Setup
 
-## Learn More
+```bash
+git clone https://github.com/ParnaSaeidpour/postit.git
+cd postit
+npm install
+cp .env.example .env        # then fill in your own values
+npx prisma migrate dev      # creates the database tables
+npm run dev                 # http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [`.env.example`](.env.example). `.env` is in `.gitignore`, so your values are never committed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string for Prisma |
+| `NEXTAUTH_URL`, `NEXTAUTH_SECRET` | NextAuth base URL and session encryption secret |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth client |
 
-## Deploy on Vercel
+## Tests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm test
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `__tests__/posts.test.ts`: post text validation (empty, whitespace, 300-character limit)
+- `__tests__/api.test.ts`: the three API routes with Prisma and NextAuth replaced by fakes (no database or Google login needed). Covers creating a post, sign-in checks, invalid text, wrong HTTP methods, ordering, and that email addresses are not returned.
+
+GitHub Actions runs the tests and a production build on every push and pull request.
+
+## Project structure
+
+```
+app/
+├── page.tsx               # home feed
+├── dashboard/             # signed-in user's posts
+├── auth/                  # Nav, Login, Logged, React Query provider
+└── components/            # AddPost, Post, types
+pages/api/
+├── auth/[...nextauth].ts
+└── posts/                 # getPosts, addPosts, authPosts
+lib/posts.ts               # validation and public user fields
+prisma/                    # schema, migrations, shared client
+__tests__/                 # Vitest tests
+```
